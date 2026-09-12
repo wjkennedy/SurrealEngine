@@ -5,6 +5,7 @@
 #include "Utils/AlignedAlloc.h"
 #include "Utils/Logger.h"
 #include <sstream>
+#include <cstring>
 
 void UProperty::Load(ObjectStream* stream)
 {
@@ -486,17 +487,20 @@ bool UBoolProperty::CompareLessElement(const void* v1, const void* v2)
 
 bool UBoolProperty::GetBool(const void* data) const
 {
-	uint32_t v = *static_cast<const uint32_t*>(data);
+	uint32_t v = 0;
+	std::memcpy(&v, data, sizeof(v));
 	return (v & DataOffset.BitfieldMask) != 0;
 }
 
 void UBoolProperty::SetBool(void* data, bool value)
 {
-	uint32_t& v = *static_cast<uint32_t*>(data);
+	uint32_t v = 0;
+	std::memcpy(&v, data, sizeof(v));
 	if (value)
 		v = v | DataOffset.BitfieldMask;
 	else
 		v = v & ~DataOffset.BitfieldMask;
+	std::memcpy(data, &v, sizeof(v));
 }
 
 void UBoolProperty::SetValueFromString(void* data, const std::string& valueString)

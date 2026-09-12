@@ -187,7 +187,14 @@ inline Coords Coords::ViewToRenderDev()
 	coords.Origin = { 0.0f, 0.0f, 0.0f };
 	coords.XAxis = vec3(0.0f, 0.0f, 1.0f);
 	coords.YAxis = vec3(1.0f, 0.0f, 0.0f);
+	// WebGL presents the framebuffer with the opposite viewport origin from
+	// the native backends. Keep native behavior and use a positive render Y
+	// for the browser's 3D view so Unreal's Z-up world stays upright.
+#ifdef __EMSCRIPTEN__
+	coords.ZAxis = vec3(0.0f, 1.0f, 0.0f);
+#else
 	coords.ZAxis = vec3(0.0f, -1.0f, 0.0f);
+#endif
 	return coords;
 }
 

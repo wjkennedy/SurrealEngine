@@ -11,6 +11,7 @@
 #include "GC/GC.h"
 #include <set>
 #include <optional>
+#include <cstring>
 
 class UObject;
 class UClass;
@@ -108,15 +109,18 @@ struct BitfieldBool
 
 	bool Get() const
 	{
-		return ((*Ptr) & Mask) != 0;
+		uint32_t value = 0;
+		std::memcpy(&value, Ptr, sizeof(value));
+		return (value & Mask) != 0;
 	}
 
 	void Set(bool value)
 	{
-		if (value)
-			(*Ptr) |= Mask;
-		else
-			(*Ptr) &= ~Mask;
+		uint32_t current = 0;
+		std::memcpy(&current, Ptr, sizeof(current));
+		if (value) current |= Mask;
+		else current &= ~Mask;
+		std::memcpy(Ptr, &current, sizeof(current));
 	}
 
 	operator bool() const { return Get(); }

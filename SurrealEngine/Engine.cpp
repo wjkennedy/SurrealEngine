@@ -28,6 +28,9 @@
 #include "VM/ScriptCall.h"
 #include "Video/VideoPlayer.h"
 #include <chrono>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 #include <set>
 
 Engine* engine = nullptr;
@@ -78,7 +81,16 @@ Engine::~Engine()
 	if (audiodev)
 		audiodev->ShutdownDevice();
 
-	Logger::Get()->SaveLogAsPlaintext((Directory::localAppData() / "SurrealEngine/SE-Log-LastRun.txt").string());
+	try
+	{
+		auto logDir = Directory::localAppData() / "SurrealEngine";
+		Directory::create(logDir.string());
+		Logger::Get()->SaveLogAsPlaintext((logDir / "SE-Log-LastRun.txt").string());
+	}
+	catch (const std::exception& error)
+	{
+		std::fprintf(stderr, "Could not save engine log: %s\n", error.what());
+	}
 
 	engine = nullptr;
 }
@@ -114,8 +126,14 @@ void Engine::Run()
 		LoadMap(GetDefaultURL(packages->GetIniValue("system", "URL", "LocalMap")));
 	else
 		LoadMap(UnrealURL(GetDefaultURL(packages->GetIniValue("system", "URL", "LocalMap")), LaunchInfo.url));
+	#ifdef __EMSCRIPTEN__
+	std::fprintf(stderr, "[WASM] map loaded\n");
+	#endif
 
 	LoginPlayer();
+	#ifdef __EMSCRIPTEN__
+	std::fprintf(stderr, "[WASM] player logged in; entering loop\n");
+	#endif
 
 	auto objprop = GC::Alloc<UObjectProperty>(NameString(), nullptr, ObjectFlags::NoFlags);
 	auto vecprop = GC::Alloc<UStructProperty>(NameString(), nullptr, ObjectFlags::NoFlags);
@@ -124,6 +142,10 @@ void Engine::Run()
 	bool firstCall = true;
 	while (!quit)
 	{
+#ifdef __EMSCRIPTEN__
+		// Yield to browser input and rendering between frames.
+		emscripten_sleep(16);
+#endif
 		// Main game loop should consist of these 4 steps:
 		// Tick everything
 		// Render the scene
@@ -1644,6 +1666,10 @@ void Engine::Key(std::string key)
 void Engine::InputEvent(EInputKey key, EInputType type, int delta)
 {
 	if (Frame::RunState != FrameRunState::Running || playingAvi)
+		return;
+	// Browser focus can deliver a key release while the first viewport is still
+	// being created. Do not apply input state to the Unreal None placeholder.
+	if (!viewport || !viewport->Actor() || !viewport->Actor()->Level())
 		return;
 
 	bool handled = CallEvent(console, EventName::KeyEvent, { ExpressionValue::ByteValue(key), ExpressionValue::ByteValue(type), ExpressionValue::FloatValue((float)delta) }).ToBool();

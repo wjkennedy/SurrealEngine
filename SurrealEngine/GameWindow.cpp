@@ -3,9 +3,11 @@
 #include "GameWindow.h"
 #include "LauncherSettings.h"
 #include "RenderDevice/RenderDevice.h"
+#ifndef __EMSCRIPTEN__
 #include <zvulkan/vulkansurface.h>
 #include <zvulkan/vulkancompatibledevice.h>
 #include <zvulkan/vulkanbuilders.h>
+#endif
 
 GameWindow::GameWindow(GameWindowHost* windowHost, RenderAPI renderAPI) : Widget(nullptr, WidgetType::Window, renderAPI), windowHost(windowHost)
 {
@@ -155,6 +157,9 @@ void GameWindow::OnLostFocus()
 std::unique_ptr<GameWindow> GameWindow::Create(GameWindowHost* windowHost)
 {
 	RenderAPI api;
+#ifdef __EMSCRIPTEN__
+	return std::make_unique<GameWindow>(windowHost, RenderAPI::OpenGL);
+#endif
 	switch (LauncherSettings::Get().RenderDevice.Type)
 	{
 	default:

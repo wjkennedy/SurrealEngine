@@ -33,6 +33,8 @@ struct InitDbgHelp
 	bool bHasSymbols;
 };
 
+#elif defined __EMSCRIPTEN__
+#include <emscripten.h>
 #elif defined __linux__
 
 #include <execinfo.h>

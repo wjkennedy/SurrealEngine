@@ -12,6 +12,10 @@
 #include <cmath>
 #include <queue>
 #include <thread>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/eventloop.h>
+#endif
 #include <chrono>
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -121,7 +125,11 @@ public:
 		if (bIs3d != bSpatial)
 		{
 			bIs3d = bSpatial;
-			alSourcei(id, AL_SOURCE_SPATIALIZE_SOFT, bIs3d);
+			#ifdef __EMSCRIPTEN__
+            alSourcei(id, AL_SOURCE_RELATIVE, !bIs3d);
+#else
+            alSourcei(id, AL_SOURCE_SPATIALIZE_SOFT, bIs3d);
+#endif
 		}
 	}
 
@@ -227,7 +235,9 @@ public:
 		alListener3f(AL_POSITION, 0, 0, 0.0f);
 		alListener3f(AL_VELOCITY, 0, 0, 0);
 		alListenerfv(AL_ORIENTATION, listenerOri);
-		alListenerf(AL_METERS_PER_UNIT, 1.f / UU_PER_METER);
+		#ifndef __EMSCRIPTEN__
+        alListenerf(AL_METERS_PER_UNIT, 1.f / UU_PER_METER);
+#endif
 
 		alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 		alSpeedOfSound(343.3f / (1.0f / UU_PER_METER));
@@ -235,19 +245,36 @@ public:
 		// Init sound sources
 		alcGetIntegerv(alDevice, ALC_MONO_SOURCES, 1, &monoSources);
 		alcGetIntegerv(alDevice, ALC_STEREO_SOURCES, 1, &stereoSources);
+#ifdef __EMSCRIPTEN__
+		// WebAudio advertises effectively unlimited sources, not a practical
+		// pool size. Allocate a bounded pool for the browser renderer.
+		monoSources = 64;
+		stereoSources = 1;
+#endif
 
 		// TODO: how do we prioritize mono vs stereo source count?
 		sources.resize(monoSources);
 
 		// init music source/buffer
 		alGenSources(1, &alMusicSource);
-		alSourcei(alMusicSource, AL_SOURCE_SPATIALIZE_SOFT, AL_FALSE);
+		#ifdef __EMSCRIPTEN__
+        alSourcei(alMusicSource, AL_SOURCE_RELATIVE, AL_TRUE);
+#else
+        alSourcei(alMusicSource, AL_SOURCE_SPATIALIZE_SOFT, AL_FALSE);
+#endif
 
 		alMusicBuffers.resize(musicBufferCount);
 		alGenBuffers(musicBufferCount, &alMusicBuffers[0]);
 
 		// init playback thread
+		#ifdef __EMSCRIPTEN__
+		// MusicThreadMain can throw across an emscripten timer callback, which
+		// turns into an opaque native abort in the iframe. Browser music is
+		// currently optional; keep the main game loop alive while it is absent.
+		musicInterval = 0;
+#else
 		musicThreadData.thread = std::thread([this]() { MusicThreadMain(); });
+#endif
 	}
 
 	~OpenALAudioDevice()
@@ -255,7 +282,11 @@ public:
 		std::unique_lock lock(musicThreadData.mutex);
 		musicThreadData.exitFlag = true;
 		lock.unlock();
+		#ifdef __EMSCRIPTEN__
+		emscripten_clear_interval(musicInterval);
+#else
 		musicThreadData.thread.join();
+#endif
 
 		alSourceStop(alMusicSource);
 		alDeleteSources(1, &alMusicSource);
@@ -478,10 +509,13 @@ public:
 		}
 	}
 
+	std::unique_ptr<AudioSource> currentMusic;
+	bool musicPlaying = false;
+#ifdef __EMSCRIPTEN__
+	long musicInterval = 0;
+#endif
 	void MusicThreadMain()
 	{
-		std::unique_ptr<AudioSource> currentMusic;
-		bool musicPlaying = false;
 
 		while (true)
 		{
@@ -529,7 +563,11 @@ public:
 				musicPlaying = false;
 			}
 			using namespace std::chrono_literals;
-			std::this_thread::sleep_for(5ms);
+#ifdef __EMSCRIPTEN__
+            break;
+#else
+            std::this_thread::sleep_for(5ms);
+#endif
 		}
 	}
 

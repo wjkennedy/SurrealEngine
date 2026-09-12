@@ -3359,7 +3359,9 @@ void UPlayerPawn::TickRotating(float elapsed)
 
 void UPlayerPawn::LoadProperties()
 {
-	bInvertMouse() = IniPropertyConverter<bool>::FromIniFile(*engine->packages->GetIniFile("user"), "Engine.PlayerPawn", "bInvertMouse", true);
+	// UT99's standard controls are non-inverted.  The old fallback of true made
+	// browser mouselook feel upside down whenever User.ini had no override.
+	bInvertMouse() = IniPropertyConverter<bool>::FromIniFile(*engine->packages->GetIniFile("user"), "Engine.PlayerPawn", "bInvertMouse", false);
 	MouseSensitivity() = IniPropertyConverter<float>::FromIniFile(*engine->packages->GetIniFile("user"), "Engine.PlayerPawn", "MouseSensitivity", 5.0f);
 	// TODO: Handle the array property this class has (WeaponPriority)
 	DodgeClickTime() = IniPropertyConverter<float>::FromIniFile(*engine->packages->GetIniFile("user"), "Engine.PlayerPawn", "DodgeClickTime", 0.25f);

@@ -2,7 +2,11 @@
 #include "Precomp.h"
 #include "RenderDevice.h"
 #include "LauncherSettings.h"
+#ifdef __EMSCRIPTEN__
+#include "WebGPUWasm/WebGLRenderDevice.h"
+#else
 #include "Vulkan/VulkanRenderDevice.h"
+#endif
 #ifdef WIN32
 #include "D3D11/D3D11RenderDevice.h"
 #endif
@@ -27,6 +31,9 @@ RenderDevice::RenderDevice()
 
 std::unique_ptr<RenderDevice> RenderDevice::Create(Widget* viewport, RenderAPI renderAPI)
 {
+#ifdef __EMSCRIPTEN__
+	return CreateWebGLRenderDevice(viewport);
+#else
 	if (renderAPI == RenderAPI::Vulkan)
 	{
 		return std::make_unique<VulkanRenderDevice>(viewport);
@@ -41,6 +48,7 @@ std::unique_ptr<RenderDevice> RenderDevice::Create(Widget* viewport, RenderAPI r
 	{
 		Exception::Throw("Render API not available on this platform");
 	}
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////

@@ -382,6 +382,9 @@ fs::path Directory::localAppData()
 
 std::string OS::executable_path()
 {
+#ifdef __EMSCRIPTEN__
+	return "/";
+#endif
 #if defined(WIN32)
 	WCHAR exe_filename[_MAX_PATH];
 	DWORD len = GetModuleFileName(nullptr, exe_filename, _MAX_PATH);
