@@ -106,7 +106,7 @@ canvas {
   position: absolute;
   z-index: 1;
   left: 12px;
-  top: 12px;
+  bottom: 24px;
   max-width: calc(100% - 24px);
   padding: 7px 10px;
   color: #e5edf3;

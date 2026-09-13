@@ -1,0 +1,9 @@
+node_modules/
+static/surreal/node_modules/
+static/surreal/dist/
+static/surreal/public/wasm/*.js
+static/surreal/public/wasm/*.wasm
+static/surreal/public/wasm/*.data
+*.log
+static/surreal/public/ut99/
+static/surreal/public/wasm/*.gz

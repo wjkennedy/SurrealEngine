@@ -109,7 +109,12 @@ void Engine::Run()
 	audiodev->InitDevice();
 	render = std::make_unique<RenderSubsystem>(window->GetRenderDevice());
 
-	if (engine->LaunchInfo.engineVersion > 219 && !client->StartupFullscreen)
+	if (engine->LaunchInfo.engineVersion > 219 &&
+#ifdef __EMSCRIPTEN__
+		true) // Browser menus use absolute canvas coordinates, even in fullscreen.
+#else
+		!client->StartupFullscreen)
+#endif
 		viewport->bWindowsMouseAvailable() = true;
 
 	window->LockCursor();

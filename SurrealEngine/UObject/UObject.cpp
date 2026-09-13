@@ -243,7 +243,9 @@ uint8_t UObject::GetByte(const NameString& name) const
 
 uint32_t UObject::GetInt(const NameString& name) const
 {
-	return *static_cast<const uint32_t*>(GetProperty(name));
+	uint32_t value = 0;
+	std::memcpy(&value, GetProperty(name), sizeof(value));
+	return value;
 }
 
 bool UObject::GetBool(const NameString& propName) const
@@ -254,12 +256,16 @@ bool UObject::GetBool(const NameString& propName) const
 
 float UObject::GetFloat(const NameString& name) const
 {
-	return *static_cast<const float*>(GetProperty(name));
+	float value = 0.0f;
+	std::memcpy(&value, GetProperty(name), sizeof(value));
+	return value;
 }
 
 vec3 UObject::GetVector(const NameString& name) const
 {
-	return *static_cast<const vec3*>(GetProperty(name));
+	vec3 value{};
+	std::memcpy(&value, GetProperty(name), sizeof(value));
+	return value;
 }
 
 Rotator UObject::GetRotator(const NameString& name) const

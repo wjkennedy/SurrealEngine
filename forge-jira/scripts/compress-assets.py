@@ -2,13 +2,14 @@ import sys,json,gzip
 from pathlib import Path
 source,target=map(Path,sys.argv[1:])
 manifest=json.load(sys.stdin)
+overrides=manifest.pop('textOverrides', {})
 total=0
 for name in manifest['bootstrapFiles']:
     src=source/name
     dst=target/(name+'.gz')
     dst.parent.mkdir(parents=True,exist_ok=True)
-    if not dst.exists() or dst.stat().st_mtime<src.stat().st_mtime:
-        data=src.read_bytes()
+    if name in overrides or not dst.exists() or dst.stat().st_mtime<src.stat().st_mtime:
+        data=overrides[name].encode('utf-8') if name in overrides else src.read_bytes()
         dst.write_bytes(gzip.compress(data, compresslevel=9, mtime=0))
     total+=dst.stat().st_size
 for p in target.rglob('*'):

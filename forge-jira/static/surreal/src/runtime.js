@@ -35,6 +35,9 @@ export async function mountAssets(Module, config, manifest, fetchFile = fetch, o
     const target = `/ut/${path}`;
     Module.FS.mkdirTree(target.slice(0, target.lastIndexOf('/')));
     Module.FS.writeFile(target, bytes);
+    if (path === 'Music/Credits.umx') {
+      Module.FS.writeFile('/ut/Music/credits.umx', bytes);
+    }
     onProgress(index + 1, manifest.bootstrapFiles.length, path);
   }
 }
@@ -54,7 +57,7 @@ export async function startRuntime({ config, manifest, canvas, loadScript, fetch
     locateFile(path) {
       if (path.endsWith('.wasm')) return config.wasmBinary;
       if (path.endsWith('.data')) return config.dataArchive;
-      return `wasm/${path}`;
+      return new URL(`wasm/${path}`, document.baseURI).href;
     },
     print: text => { console.log(text); onLog(`WASM: ${text}`); },
     printErr: text => { console.error(text); onLog(`WASM error: ${text}`); },

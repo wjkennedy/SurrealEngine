@@ -131,6 +131,9 @@ void main(){vec4 c=texture(baseTexture,texCoord); if(masked && c.a<.5) discard; 
         Draw(verts,&tex,nullptr,flags);
     }
     void DrawTile(FSceneNode* f,FTextureInfo& tex,float x,float y,float w,float h,float u,float v,float uw,float vh,float z,vec4 color,vec4,uint32_t flags) override {
+        // UT99 Canvas DrawColor supplies RGB; its unused alpha is often zero.
+        // Opacity comes from texture masking and the surface blend flags.
+        color.w = 1.0f;
         SetSceneNode(f);float l=2*x/f->FX-1,r=2*(x+w)/f->FX-1,t=1-2*y/f->FY,b=1-2*(y+h)/f->FY;
         float U=GetUMult(tex),V=GetVMult(tex);
         Draw({{{l,t,0},{u*U,v*V},{0,0},color},{{r,t,0},{(u+uw)*U,v*V},{0,0},color},{{r,b,0},{(u+uw)*U,(v+vh)*V},{0,0},color},{{l,b,0},{u*U,(v+vh)*V},{0,0},color}},&tex,nullptr,flags,true);

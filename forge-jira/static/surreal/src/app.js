@@ -16,7 +16,7 @@ root.innerHTML = `
     <section class="viewport" aria-label="Surreal Engine viewport">
       <canvas id="canvas" tabindex="0"></canvas>
       <div class="controls-hint" id="controls-hint" role="note" hidden>
-        <strong>Controls</strong> · WASD move · Mouse look · Left click fire · Right click alt-fire · Space jump · P menu
+        <strong>Controls</strong> · WASD move · Mouse look · Click fire · Space jump · P preferences · F7 player setup · F8 practice match
       </div>
       <pre class="asset-log" id="asset-log" aria-live="polite"></pre>
       <div class="overlay" id="overlay">
@@ -44,13 +44,6 @@ const socketState = document.getElementById('socket-state');
 const assetLog = document.getElementById('asset-log');
 const controlsHint = document.getElementById('controls-hint');
 
-window.addEventListener('keydown', event => {
-  if (event.key.toLowerCase() !== 'p' || wasmState.textContent !== 'WASM: running') return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  if (overlay.hidden) showBrowserMenu();
-}, true);
-
 function logAsset(message) {
   const lines = assetLog.textContent ? assetLog.textContent.split('\n') : [];
   lines.push(`[${new Date().toLocaleTimeString()}] ${message}`);
@@ -68,14 +61,6 @@ function setOverlay(title, detail) {
   overlay.hidden = false;
 }
 
-function showBrowserMenu() {
-  overlay.innerHTML = '<h1>Surreal Tournament</h1><p>WASD move · Mouse look · Left click fire · Right click alt-fire · Space jump</p><button type="button" id="resume-game">Resume</button>';
-  overlay.hidden = false;
-  document.getElementById('resume-game').addEventListener('click', () => {
-    overlay.hidden = true;
-    canvas.focus();
-  }, { once: true });
-}
 
 function getDefaultConfig() {
   return {
@@ -252,6 +237,10 @@ async function boot() {
 
 function reportFailure(error) {
   console.error(error);
+  // Prevent queued browser input events from calling into a WASM instance
+  // whose main entrypoint has already aborted.
+  canvas.style.pointerEvents = 'none';
+  canvas.blur();
   window.SurrealRuntimeError = getErrorMessage(error);
   wasmState.textContent = 'WASM: failed';
   setStatus('Runtime failed');

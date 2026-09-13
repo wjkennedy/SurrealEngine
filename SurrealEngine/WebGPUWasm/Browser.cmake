@@ -6,6 +6,9 @@ list(FILTER BROWSER_ENGINE EXCLUDE REGEX "/UI/Editor/|/Utils/UTF8Reader\\.cpp$")
 file(GLOB_RECURSE BROWSER_WIDGETS CONFIGURE_DEPENDS SurrealWidgets/src/core/*.cpp SurrealWidgets/src/widgets/*.cpp SurrealWidgets/src/systemdialogs/*.cpp SurrealWidgets/src/window/stub/*.cpp)
 list(FILTER BROWSER_WIDGETS EXCLUDE REGEX "resourcedata_(unix|win)\\.cpp$")
 list(FILTER BROWSER_ENGINE EXCLUDE REGEX "/Video/VideoPlayer\\.cpp$|/Audio/AudioMixer\\.cpp$")
+# Commandlets and crash-reporting are desktop tools. They are never reached by
+# the browser game loop, but otherwise retain code in the Forge payload.
+list(FILTER BROWSER_ENGINE EXCLUDE REGEX "/Commandlet/|/Utils/CrashReporter\\.cpp$")
 list(APPEND BROWSER_WIDGETS SurrealWidgets/src/window/window.cpp)
 add_subdirectory(Thirdparty/openmpt)
 add_executable(surreal-engine ${BROWSER_ENGINE} ${BROWSER_WIDGETS}
@@ -20,8 +23,6 @@ target_link_libraries(surreal-engine PRIVATE openmpt)
 target_link_options(surreal-engine PRIVATE -fexceptions -lopenal
     "-sASYNCIFY" "-sASYNCIFY_STACK_SIZE=1048576" "-sSTACK_SIZE=8388608"
     "-sALLOW_MEMORY_GROWTH=1" "-sINITIAL_MEMORY=268435456"
-    "-sASSERTIONS=1" "-sSTACK_OVERFLOW_CHECK=2"
-    "-sSAFE_HEAP=1" "--profiling-funcs"
     "-sMAX_WEBGL_VERSION=2" "-sMIN_WEBGL_VERSION=2"
     "-sFORCE_FILESYSTEM=1" "-sEXIT_RUNTIME=0"
     "--embed-file" "${CMAKE_SOURCE_DIR}/SurrealEngine.pk3@/SurrealEngine.pk3"

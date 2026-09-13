@@ -40,9 +40,9 @@ checks that it remains below Forge’s 100,000,000-byte static resource limit.
 ## Controls
 
 `W A S D` moves, the mouse looks, left click fires, right click uses alternate
-fire, and Space jumps. `P` opens the browser help menu; Resume returns to the
-game. Escape is left to the host canvas and Jira frame. The UnrealScript menu command is retained, but full UT99 setup/options UI
-is not yet exposed in the browser shell.
+fire, and Space jumps. `P` opens the native UT99 Preferences window directly,
+including Video, Audio, Input, and Controls. Escape is left to the host canvas and Jira
+frame.
 
 ## Verification
 

@@ -28,7 +28,7 @@ int main(int argc, char** argv)
         info.gameVersionString = "436";
         info.gameExecutableName = "UnrealTournament";
         info.gameRootFolder = "/ut";
-        info.url = "DM-Tutorial.unr";
+        info.url = "Entry.unr";
         Engine game(info);
         game.Run();
     } catch (const std::exception& error) {
