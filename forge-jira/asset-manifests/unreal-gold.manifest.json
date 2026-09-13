@@ -1,0 +1,19 @@
+{
+  "game": "unreal-gold",
+  "sourceRoot": "/Volumes/UNREAL_GOLD",
+  "mountPoint": "/ut",
+  "bootstrapCount": 11,
+  "bootstrapFiles": [
+    "System/Core.u",
+    "System/Engine.u",
+    "System/Default.ini",
+    "System/Unreal.ini",
+    "System/Core.int",
+    "System/D3DDrv.int",
+    "System/Engine.int",
+    "System/Galaxy.int",
+    "System/GlideDrv.int",
+    "System/Unreal.int",
+    "Maps/Entry.unr"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "surreal-engine-forge-jira",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Forge Custom UI wrapper for running Surreal Engine WASM inside Jira.",
+  "license": "MIT",
+  "scripts": {
+    "build:ui": "npm run assets:bundle && npm --prefix static/surreal run build && node scripts/check-payload.mjs",
+    "build:engine": "bash scripts/build-engine-wasm.sh",
+    "build:all": "npm run build:engine && npm run build:ui",
+    "assets:manifest": "bash scripts/generate-asset-manifest.sh",
+    "assets:stage": "bash scripts/stage-game-assets.sh",
+    "assets:check": "bash scripts/check-asset-completeness.sh",
+    "assets:deploy:dry": "bash scripts/deploy-assets.sh 1",
+    "assets:deploy": "bash scripts/deploy-assets.sh 0",
+    "assets:publish": "bash scripts/publish-assets.sh",
+    "lint": "forge lint",
+    "test": "node --test tests/*.test.mjs",
+    "stage:wasm": "bash scripts/stage-wasm.sh",
+    "deploy": "npm run build:ui && forge deploy",
+    "install:test": "bash scripts/install-test.sh",
+    "forge:install": "forge install",
+    "test:wasm": "node scripts/smoke-wasm.mjs",
+    "verify": "npm test && npm run build:all && npm run test:wasm && forge lint",
+    "assets:bundle": "node scripts/bundle-launch-assets.mjs"
+  },
+  "dependencies": {
+    "@forge/resolver": "^1.6.15"
+  }
+}

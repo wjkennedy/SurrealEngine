@@ -1,0 +1,5 @@
+# For a public game asset origin; requires Apache mod_headers and AllowOverride.
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+</IfModule>

@@ -45,9 +45,7 @@ class WebGLRenderDevice : public RenderDevice {
             }
         }
         glBindTexture(GL_TEXTURE_2D,texture);
-        glPixelStorei(0x9240 /* GL_UNPACK_FLIP_Y_WEBGL */, GL_TRUE);
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,mip.Width,mip.Height,0,GL_RGBA,GL_UNSIGNED_BYTE,pixels.data());
-        glPixelStorei(0x9240 /* GL_UNPACK_FLIP_Y_WEBGL */, GL_FALSE);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);

@@ -1,0 +1,44 @@
+app:
+  id: ari:cloud:ecosystem::app/945d7ce1-1e6c-48a2-b02e-aafb23158b65
+  runtime:
+    name: nodejs24.x
+
+modules:
+  jira:globalPage:
+    - key: surreal-engine-page
+      resource: surreal-engine-ui
+      resolver:
+        function: resolver
+      title: Surreal Engine
+      layout: blank
+  function:
+    - key: resolver
+      handler: index.handler
+
+resources:
+  - key: surreal-engine-ui
+    path: static/surreal/dist
+
+permissions:
+  scopes: []
+  content:
+    scripts:
+      - unsafe-eval
+    styles:
+      - unsafe-inline
+  external:
+    fetch:
+      client:
+        - remote: game-assets
+        - remote: websocket-relay
+      backend: []
+
+remotes:
+  - key: game-assets
+    baseUrl: "https://ut.a9group.net"
+    operations:
+      - fetch
+  - key: websocket-relay
+    baseUrl: "wss://ut.a9group.net"
+    operations:
+      - fetch
